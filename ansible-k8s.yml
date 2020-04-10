@@ -1,0 +1,56 @@
+#instalar k8s practicar
+- hosts: all
+  become: yes
+  vars_files:
+    - vars/default.yml
+  tasks:
+    - name: Install required system packages
+      apt: name={{ item }} state=latest update_cache=yes
+      loop: [ 'apt-transport-https', 'ca-certificates', 'curl', 'software-properties-common', 'python3-pip', 'virtualenv', 'python3-setuptools']
+
+    - name: add apt-key docker
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu bionic stable
+        state: present
+
+    - name: apt-key add k8s
+      apt_key:
+        url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+        state: present
+
+    - apt_repository:
+        repo: deb https://apt.kubernetes.io/ kubernetes-xenial main
+        state: present
+
+        # - name: Update all packages to the latest version
+      #      apt:
+      #        upgrade: dist
+
+    - name: Install docker and k8s
+      apt: name={{ item }}  update_cache=yes
+      loop: [ 'docker-ce', 'kubelet=1.13.5-00', 'kubectl=1.13.5-00', 'kubeadm=1.13.5-00']
+
+    - name: Enable iptables bridge call
+      lineinfile:
+        path: /etc/sysctl.conf
+        line: net.bridge.bridge-nf-call-iptables=1
+
+    - name: syscontrol -p
+      command: sysctl -p
+
+- hosts: manager
+  become: no
+  tasks:
+    - name: init master node
+      command: kubeadm init --pod-network-cidr=10.244.0.0/16
+
+    - name: mkdir .kube
+      command: "{{ item }}"
+      loop: [ 'mkdir -p $HOME/.kube', 'sudo cp /etc/kubernetes/admin.conf $HOME/.kube/config', 'sudo chown $(id -u):$(id -g) $HOME/.kube/config', 'export KUBECONFIG=$HOME/admin.conf']
+
+    - name: flanner
+      command: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
