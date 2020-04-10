@@ -40,7 +40,7 @@
     - name: syscontrol -p
       command: sysctl -p
 
-- hosts: manager
+- hosts: master
   become: no
   tasks:
     - name: init master node
