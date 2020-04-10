@@ -1,6 +1,6 @@
 [all]
 k8s
 
-[manager]
+[master]
 k8s
 
