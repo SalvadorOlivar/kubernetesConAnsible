@@ -1,8 +1,6 @@
 #instalar k8s practicar
 - hosts: all
   become: yes
-  vars_files:
-    - vars/default.yml
   tasks:
     - name: Install required system packages
       apt: name={{ item }} state=latest update_cache=yes
@@ -26,9 +24,9 @@
         repo: deb https://apt.kubernetes.io/ kubernetes-xenial main
         state: present
 
-        # - name: Update all packages to the latest version
-      #      apt:
-      #        upgrade: dist
+    - name: Update all packages to the latest version
+      apt:
+        upgrade: dist
 
     - name: Install docker and k8s
       apt: name={{ item }}  update_cache=yes
