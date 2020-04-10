@@ -1,5 +1,6 @@
 [all]
-k8s-W1
+k8s
 
 [manager]
+k8s
 
