@@ -1,0 +1,12 @@
+- hosts: master
+  become: no
+  tasks:
+    - name: init master node
+      command: kubeadm init --pod-network-cidr=10.244.0.0/16
+
+    - name: mkdir .kube
+      command: "{{ item }}"
+      loop: [ 'mkdir -p $HOME/.kube', 'sudo cp /etc/kubernetes/admin.conf $HOME/.kube/config', 'sudo chown $(id -u):$(id -g) $HOME/.kube/config', 'export KUBECONFIG=$HOME/admin.conf']
+
+    - name: flanner
+      command: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
